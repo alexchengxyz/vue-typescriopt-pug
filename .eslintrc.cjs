@@ -12,6 +12,7 @@ module.exports = {
     'plugin:vue/vue3-recommended',
     '@vue/eslint-config-typescript',
     '@vue/eslint-config-airbnb',
+    'plugin:vue-pug/vue3-recommended',
   ],
   parserOptions: {
     ecmaVersion: 'latest',
