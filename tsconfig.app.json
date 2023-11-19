@@ -9,7 +9,9 @@
     "composite": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@styles/*": ["./src/assets/styles/*"],
+      "@theme/*": ["./src/assets/theme/*"],
     }
   }
 }

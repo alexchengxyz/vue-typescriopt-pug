@@ -34,13 +34,19 @@ module.exports = {
   settings: {
     ...createAliasSetting({
       '@': `${path.resolve(__dirname, './src')}`,
+      '@styles': `${path.resolve(__dirname, './src/assets/styles')}`,
+      '@theme': `${path.resolve(__dirname, './src/assets/theme')}`,
     }),
     'import/parsers': {
       '@typescript-eslint/parser': ['.ts', '.tsx'],
     },
     'import/resolver': {
       alias: {
-        map: [['@', './src']],
+        map: [
+          ['@', './src'],
+          ['@styles', './src/assets/styles'],
+          ['@theme', './src/assets/theme'],
+        ],
         extensions: ['.ts', '.js', '.jsx', '.json'],
       },
       node: true,
