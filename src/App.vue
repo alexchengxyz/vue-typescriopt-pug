@@ -1,19 +1,41 @@
 <template lang="pug">
 header
-  TheWelcome
-  HelloWorld
+    img.img-fluid(
+        :srcset="`${imageUrl('banner2', '480')} 480w, ${imageUrl('banner1', '1920')} 1920w`"
+        sizes="(max-width: 480px), (max-width: 1920px)"
+        alt="banner"
+    )
 </template>
 
 <script setup lang="ts">
-import TheWelcome from '@/components/TheWelcome.vue';
-import HelloWorld from './components/HelloWorld.vue';
+// import { ref, computed, onMounted } from 'vue';
+import { inject } from 'vue';
+import type { GlobalInfo } from '../types';
+
+const globalInfo = inject<GlobalInfo>('globalInfo');
+
+const imageUrl = (name: string, size: string, extName: string = 'jpg') => {
+    let url = `./images/${globalInfo?.promotionId}/${name}-${globalInfo?.lang}`;
+
+    if (size) {
+        url = `${url}-${size}`;
+    }
+
+    if (extName) {
+        url = `${url}.${extName}`;
+    }
+
+    return url;
+};
+
+// State
+
+// Computed
+
+// onMounted(() => {
+
+// });
+
 </script>
 
-<style scoped lang="scss">
-@import './assets/theme/demo01/styles/color.scss';
-
-body {
-    color: $body-color;
-    background: $body-bg;
-}
-</style>
+<style scoped lang="scss"></style>

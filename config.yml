@@ -1,0 +1,79 @@
+#Template Job
+.ssh-job:
+  image: alpine:latest
+  variables:
+    PRIVATE_KEY: ""
+    SERVER_URL: ""
+    SERVER_USER: ""
+    SERVER_PORT: ""
+    SSH_COMMAND: ""
+  tags:
+  - dockerrunner1
+  before_script:
+  - 'command -v ssh-agent >/dev/null || ( apk add --update openssh )'
+  - eval $(ssh-agent -s)
+  - ssh-add <(echo "$PRIVATE_KEY")
+  - echo $SSH_COMMAND
+  script:
+  - ssh -o StrictHostKeyChecking=no $SERVER_USER@$SERVER_URL -p $SERVER_PORT $SSH_COMMAND
+
+.ssh-rd-site:
+  extends: .ssh-job
+  variables:
+    PRIVATE_KEY: $CI_PRIVATE_KEY
+    SERVER_URL: $CI_SERVER_URL
+    SERVER_USER: $RD_SERVER_USER
+    SERVER_PORT: $RD_SERVER_PORT
+    SSH_COMMAND: ""
+
+.ssh-storage:
+  extends: .ssh-job
+  variables:
+    PRIVATE_KEY: $CI_PRIVATE_KEY
+    SERVER_URL: 35.221.168.33
+    SERVER_USER: $RD_SERVER_USER
+    SERVER_PORT: 22
+    SSH_COMMAND: ""
+
+.send-to-server:
+  image: kroniak/ssh-client
+  stage: publish
+  tags:
+  - runnerforh5system1
+  before_script:
+  - 'which ssh-agent || (apt-get update -y && apt-get install openssh-client -y )'
+  - eval $(ssh-agent -s)
+  - ssh-add <(echo "${PRIVATE_KEY}")
+  - mkdir -p ~/.ssh
+  - chmod 600 ~/.ssh
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\tPort ${PORT}\n\n" > ~/.ssh/config'
+  script:
+  - scp -P ${PORT} build/${VERSION}.tar.gz ${USER}@${SERVER_URL}:/home/${USER}
+  only:
+  - develop
+
+.package:
+  stage: test_build
+  tags:
+  - runnerforh5system1
+  cache:
+    key: $CI_COMMIT_REF_SLUG-$CI_PROJECT_DIR
+    paths:
+    - node_modules/
+    - .npm/
+    policy: pull-push
+  before_script:
+  - '[[ -d "./node_modules" ]] || npm ci --cache .npm --prefer-offline'
+  script:
+  - node -v
+  - npm -v
+  - npm i
+  - npm run build
+  - echo ${VERSION}
+  - tar zcvf ./${VERSION}.tar.gz ./dist
+  - rm -rf build
+  - mkdir build
+  - mv ${VERSION}.tar.gz ./build
+  artifacts:
+    paths:
+    - build/
